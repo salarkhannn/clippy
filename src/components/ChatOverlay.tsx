@@ -55,26 +55,23 @@ const ChatOverlay: React.FC<ChatOverlayProps> = ({ onClose }) => {
 
   return (
     <div 
-        className="fixed inset-0 z-[2147483646] flex items-center justify-center p-4"
-        style={{
-            backgroundColor: THEME.overlayBgColor,
-            backdropFilter: `blur(${THEME.overlayBackdropBlur})`
-        }}
+        className="fixed inset-0 z-[2147483646] flex items-end justify-end p-4 pointer-events-none"
     >
       <div 
-        className="w-full max-w-2xl h-[80vh] flex flex-col rounded-2xl shadow-2xl border overflow-hidden"
+        className="w-[25vw] h-[25vh] flex flex-col rounded-2xl shadow-2xl border overflow-hidden pointer-events-auto"
         style={{
             backgroundColor: THEME.chatWindowBgColor,
-            borderColor: THEME.borderColor
+            borderColor: THEME.borderColor,
+            backdropFilter: `blur(${THEME.overlayBackdropBlur})`
         }}
       >
         <header className="flex items-center justify-between p-4 border-b" style={{ borderColor: THEME.borderColor }}>
           <div className="flex items-center gap-2">
             <SparklesIcon className="w-6 h-6 text-violet-400" />
-            <h1 className="text-lg font-bold text-neutral-100">Gemini Assistant</h1>
+            <h1 className="text-lg font-bold text-neutral-100">Clippy</h1>
           </div>
           <button onClick={onClose} className="text-neutral-400 hover:text-white transition-colors">
-            <CloseIcon className="w-6 h-6" />
+            <CloseIcon className="w-6 h-6 cursor-pointer" />
           </button>
         </header>
         

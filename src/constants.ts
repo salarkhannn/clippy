@@ -20,7 +20,7 @@ Format your response as clean, readable text.
 
 // --- UI Theming ---
 export const THEME = {
-  overlayBgColor: "rgba(10, 10, 20, 0.5)",
+  overlayBgColor: "rgba(10, 10, 20, 0)",
   overlayBackdropBlur: "8px",
   chatWindowBgColor: "rgb(23 23 23 / 0.8)", // bg-neutral-900 with opacity
   bubbleBgColor: "rgb(23 23 23 / 0.9)", // bg-neutral-900 with opacity
