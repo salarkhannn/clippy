@@ -6,7 +6,12 @@
 import { analyzeScreen, getChatResponse } from './services/geminiService';
 import { Command, MessageType } from './types';
 
+
 // Listener for keyboard shortcuts
+chrome.runtime.onStartup.addListener(() => {
+  console.log(`onStartup()`);
+});
+
 chrome.commands.onCommand.addListener((command) => {
   console.log(`Command received: ${command}`);
   if (command === Command.AnalyzeScreen) {
