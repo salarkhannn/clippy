@@ -5,6 +5,7 @@
 
 import { analyzeScreen, getChatResponse } from './services/geminiService';
 import { Command, MessageType } from './types';
+import { MCQ_PROMPT_TEMPLATE } from './constants';
 
 
 // Listener for keyboard shortcuts
@@ -36,21 +37,28 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 });
 
 async function handleAnalyzeScreen() {
+  console.log("handleAnalyzeScreen called");
   try {
+    console.log("Capturing visible tab...");
     const dataUrl = await chrome.tabs.captureVisibleTab({ format: 'jpeg', quality: 90 });
-    sendMessageToActiveTab({ type: MessageType.SHOW_ANALYSIS_BUBBLE, payload: { status: 'loading' } });
+    console.log("Tab captured. Sending loading message...");
+    // Send loading state for MCQ result
+    await sendMessageToActiveTab({ type: MessageType.SHOW_MCQ_RESULT, payload: { status: 'loading' } });
 
-    const analysis = await analyzeScreen(dataUrl);
+    console.log("Analyzing screen with Gemini...");
+    const analysis = await analyzeScreen(dataUrl, MCQ_PROMPT_TEMPLATE);
+    console.log("Analysis complete:", analysis);
 
-    sendMessageToActiveTab({
-      type: MessageType.SHOW_ANALYSIS_BUBBLE,
+    await sendMessageToActiveTab({
+      type: MessageType.SHOW_MCQ_RESULT,
       payload: { status: 'success', text: analysis },
     });
+    console.log("Success message sent.");
   } catch (error) {
     console.error("Error analyzing screen:", error);
     const errorMessage = error instanceof Error ? error.message : "An unknown error occurred.";
-    sendMessageToActiveTab({
-      type: MessageType.SHOW_ANALYSIS_BUBBLE,
+    await sendMessageToActiveTab({
+      type: MessageType.SHOW_MCQ_RESULT,
       payload: { status: 'error', text: `Error: ${errorMessage}` },
     });
   }
@@ -68,6 +76,7 @@ async function handleChat(messages: any[]) {
 }
 
 async function sendMessageToActiveTab(message: object) {
+  console.log("sendMessageToActiveTab called with:", message);
   try {
     const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
     const tab = tabs[0];
@@ -76,6 +85,7 @@ async function sendMessageToActiveTab(message: object) {
       console.log('No active tab found');
       return;
     }
+    console.log("Active tab found:", tab.id, tab.url);
 
     // Check if the tab URL is compatible with content scripts
     if (tab.url?.startsWith('chrome://') || tab.url?.startsWith('chrome-extension://') || tab.url?.startsWith('edge://')) {
@@ -86,10 +96,11 @@ async function sendMessageToActiveTab(message: object) {
 
     // Try sending the message
     try {
+      console.log("Sending message to tab:", tab.id);
       await chrome.tabs.sendMessage(tab.id, message);
       console.log('✅ Message sent successfully to content script');
     } catch (messageError) {
-      console.warn('⚠️ Content script not loaded on this page');
+      console.warn('⚠️ Content script not loaded on this page', messageError);
       console.log('💡 Please reload the page (Ctrl+R or F5) and try again');
       console.log('📝 This is normal for pages that were open before the extension was installed/updated');
     }

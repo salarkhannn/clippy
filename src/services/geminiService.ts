@@ -19,13 +19,13 @@ function dataUrlToBlob(dataUrl: string) {
   };
 }
 
-export async function analyzeScreen(screenshotDataUrl: string): Promise<string> {
+export async function analyzeScreen(screenshotDataUrl: string, prompt?: string): Promise<string> {
   try {
     const imagePart = dataUrlToBlob(screenshotDataUrl);
     const model = ai.getGenerativeModel({ model: SCREEN_ANALYSIS_MODEL });
 
     const result = await model.generateContent([
-      PROMPT_TEMPLATE,
+      prompt || PROMPT_TEMPLATE,
       imagePart
     ]);
     

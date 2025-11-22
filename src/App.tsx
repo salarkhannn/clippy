@@ -5,12 +5,14 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import FloatingBubble from './components/FloatingBubble';
 import ChatOverlay from './components/ChatOverlay';
+import MCQResult from './components/MCQResult';
 import { MessageType } from './types';
 
 export default function App() {
   const [isChatVisible, setChatVisible] = useState(false);
   // FIX: Corrected the type for bubbleContent.status to be a specific union type, resolving a type error on FloatingBubble component.
   const [bubbleContent, setBubbleContent] = useState<{ status: 'loading' | 'success' | 'error'; text: string } | null>(null);
+  const [mcqResult, setMcqResult] = useState<{ status: 'loading' | 'success' | 'error'; text?: string } | null>(null);
 
   const handleMessage = useCallback((request: any, sender: chrome.runtime.MessageSender, sendResponse: (response?: any) => void) => {
     console.log("Message received in content script:", request);
@@ -20,14 +22,25 @@ export default function App() {
         sendResponse({ status: "ok" });
         break;
       case MessageType.TOGGLE_CHAT_UI:
+        console.log("Toggling chat UI");
         setChatVisible(prev => !prev);
         break;
       case MessageType.SHOW_ANALYSIS_BUBBLE:
+        console.log("Showing analysis bubble:", request.payload);
         setBubbleContent(request.payload);
         // Automatically hide the bubble after some time
         setTimeout(() => {
           setBubbleContent(null);
         }, 15000); // 15 seconds
+        break;
+      case MessageType.SHOW_MCQ_RESULT:
+        console.log("Showing MCQ result:", request.payload);
+        setMcqResult(request.payload);
+        if (request.payload.status === 'success' || request.payload.status === 'error') {
+          setTimeout(() => {
+            setMcqResult(null);
+          }, 5000); // 5 seconds
+        }
         break;
     }
     // To acknowledge receipt
@@ -49,6 +62,13 @@ export default function App() {
           status={bubbleContent.status}
           text={bubbleContent.text}
           onClose={() => setBubbleContent(null)}
+        />
+      )}
+      {mcqResult && (
+        <MCQResult
+          status={mcqResult.status}
+          text={mcqResult.text}
+          onClose={() => setMcqResult(null)}
         />
       )}
       {isChatVisible && <ChatOverlay onClose={() => setChatVisible(false)} />}

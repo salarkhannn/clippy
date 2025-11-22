@@ -25,3 +25,7 @@ export const THEME = {
   primaryColor: "#9411ffff",
   borderColor: "#rgba(255, 255, 255, 0.1)",
 };
+
+export const MCQ_PROMPT_TEMPLATE = `
+Analyze this full screenshot. Look for multiple choice questions (MCQs). Only answer MCQs where you can see the complete question text AND all answer options (A, B, C, D, etc.) fully within the screen boundaries - not cut off at edges. If you find exactly one complete MCQ, respond with ONLY the correct letter. If there are multiple complete MCQs, respond with "MULTIPLE". If no complete MCQs are visible or if any question/options are cut off at screen edges, respond with "NO".
+`;
