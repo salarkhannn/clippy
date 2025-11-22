@@ -20,11 +20,8 @@ Format your response as clean, readable text.
 
 // --- UI Theming ---
 export const THEME = {
-  overlayBgColor: "rgba(10, 10, 20, 0)",
   overlayBackdropBlur: "8px",
-  chatWindowBgColor: "rgb(23 23 23 / 0.8)", // bg-neutral-900 with opacity
-  bubbleBgColor: "rgb(23 23 23 / 0.9)", // bg-neutral-900 with opacity
-  textColor: "#e5e5e5", // text-neutral-200
-  primaryColor: "#a78bfa", // violet-400
-  borderColor: "rgb(64 64 64)", // neutral-700
+  textColor: "#FAFAFA",
+  primaryColor: "#9411ffff",
+  borderColor: "#rgba(255, 255, 255, 0.1)",
 };
