@@ -14,11 +14,13 @@ export enum MessageType {
 
   // From Content Script to Background
   SEND_CHAT_MESSAGE = "SEND_CHAT_MESSAGE",
-  ANALYZE_SCREENSHOT = "ANALYZE_SCREENSHOT"
+  ANALYZE_SCREENSHOT = "ANALYZE_SCREENSHOT",
+  CAPTURE_SCREENSHOT = "CAPTURE_SCREENSHOT"
 }
 
 export interface ChatMessage {
   id: string;
   role: 'user' | 'model';
   text: string;
+  image?: string; // Data URL of the image
 }

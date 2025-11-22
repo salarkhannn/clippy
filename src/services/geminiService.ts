@@ -42,10 +42,16 @@ export async function getChatResponse(history: ChatMessage[]): Promise<string> {
   try {
     const model = ai.getGenerativeModel({ model: CHAT_MODEL });
     
-    const contents = history.map(message => ({
-      role: message.role === 'user' ? 'user' : 'model',
-      parts: [{ text: message.text }],
-    }));
+    const contents = history.map(message => {
+      const parts: any[] = [{ text: message.text }];
+      if (message.image) {
+        parts.push(dataUrlToBlob(message.image));
+      }
+      return {
+        role: message.role === 'user' ? 'user' : 'model',
+        parts: parts,
+      };
+    });
     
     const result = await model.generateContent({ contents });
     const response = await result.response;

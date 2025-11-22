@@ -32,9 +32,22 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.type === MessageType.SEND_CHAT_MESSAGE) {
     handleChat(request.payload.messages).then(sendResponse);
     return true; // Indicates async response
+  } else if (request.type === MessageType.CAPTURE_SCREENSHOT) {
+    handleCaptureScreenshot().then(sendResponse);
+    return true;
   }
   return false;
 });
+
+async function handleCaptureScreenshot() {
+  try {
+    const dataUrl = await chrome.tabs.captureVisibleTab({ format: 'jpeg', quality: 90 });
+    return { status: 'success', dataUrl };
+  } catch (error) {
+    console.error("Error capturing screenshot:", error);
+    return { status: 'error', text: "Failed to capture screenshot." };
+  }
+}
 
 async function handleAnalyzeScreen() {
   console.log("handleAnalyzeScreen called");
