@@ -2,8 +2,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
-import './index.css';
-
+import styles from './index.css?inline';
 
 console.log('🚀 Gemini Clippy Assistant content script initializing...');
 
@@ -16,14 +15,27 @@ if (document.getElementById(rootId)) {
   // Initialize the content script
   function initialize() {
     try {
-      let root = document.getElementById(rootId);
-      if (!root) {
-        root = document.createElement('div');
-        root.id = rootId;
-        document.body.appendChild(root);
+      let host = document.getElementById(rootId);
+      if (!host) {
+        host = document.createElement('div');
+        host.id = rootId;
+        document.body.appendChild(host);
       }
 
-      const reactRoot = ReactDOM.createRoot(root);
+      // Create shadow root
+      const shadowRoot = host.attachShadow({ mode: 'open' });
+
+      // Inject styles
+      const styleSheet = document.createElement('style');
+      styleSheet.textContent = styles;
+      shadowRoot.appendChild(styleSheet);
+
+      // Create mount point for React
+      const mountPoint = document.createElement('div');
+      mountPoint.id = 'root';
+      shadowRoot.appendChild(mountPoint);
+
+      const reactRoot = ReactDOM.createRoot(mountPoint);
       reactRoot.render(
         <React.StrictMode>
           <App />
