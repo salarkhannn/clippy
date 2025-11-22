@@ -1,0 +1,52 @@
+
+{
+  "manifest_version": 3,
+  "name": "Gemini Clippy Assistant",
+  "version": "1.0.0",
+  "description": "A Clippy-style assistant to analyze your screen and chat, powered by Gemini.",
+  "permissions": [
+    "storage",
+    "tabs",
+    "activeTab",
+    "scripting"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "background": {
+    "service_worker": "src/background.ts",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["src/content.tsx"],
+      "run_at": "document_end"
+    }
+  ],
+  "commands": {
+    "analyze_screen": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+Y",
+        "mac": "Command+Shift+Y"
+      },
+      "description": "Analyzes the current screen content."
+    },
+    "open_chat": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+U",
+        "mac": "Command+Shift+U"
+      },
+      "description": "Opens the chat interface."
+    },
+    "_execute_action": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+K",
+        "mac": "Command+Shift+K"
+      }
+    }
+  },
+  "action": {
+    "default_title": "Gemini Clippy Assistant"
+  }
+}
