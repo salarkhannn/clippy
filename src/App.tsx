@@ -6,11 +6,13 @@ import React, { useState, useEffect, useCallback } from 'react';
 import FloatingBubble from './components/FloatingBubble';
 import ChatOverlay from './components/ChatOverlay';
 import MCQResult from './components/MCQResult';
+import FloatingActionButton from './components/FloatingActionButton';
+import { ThemeProvider } from './context/ThemeContext';
 import { MessageType } from './types';
 
-export default function App() {
+function AppContent() {
   const [isChatVisible, setChatVisible] = useState(false);
-  // FIX: Corrected the type for bubbleContent.status to be a specific union type, resolving a type error on FloatingBubble component.
+  const [showFAB, setShowFAB] = useState(true);
   const [bubbleContent, setBubbleContent] = useState<{ status: 'loading' | 'success' | 'error'; text: string } | null>(null);
   const [mcqResult, setMcqResult] = useState<{ status: 'loading' | 'success' | 'error'; text?: string } | null>(null);
 
@@ -18,7 +20,6 @@ export default function App() {
     console.log("Message received in content script:", request);
     switch (request.type) {
       case 'ping':
-        // Respond to ping to confirm content script is loaded
         sendResponse({ status: "ok" });
         break;
       case MessageType.TOGGLE_CHAT_UI:
@@ -28,10 +29,9 @@ export default function App() {
       case MessageType.SHOW_ANALYSIS_BUBBLE:
         console.log("Showing analysis bubble:", request.payload);
         setBubbleContent(request.payload);
-        // Automatically hide the bubble after some time
         setTimeout(() => {
           setBubbleContent(null);
-        }, 15000); // 15 seconds
+        }, 15000);
         break;
       case MessageType.SHOW_MCQ_RESULT:
         console.log("Showing MCQ result:", request.payload);
@@ -39,13 +39,12 @@ export default function App() {
         if (request.payload.status === 'success' || request.payload.status === 'error') {
           setTimeout(() => {
             setMcqResult(null);
-          }, 5000); // 5 seconds
+          }, 5000);
         }
         break;
     }
-    // To acknowledge receipt
     sendResponse({ status: "ok" });
-    return true; // Keep the message channel open for async responses
+    return true;
   }, []);
   
   useEffect(() => {
@@ -55,8 +54,18 @@ export default function App() {
     };
   }, [handleMessage]);
 
+  const handleFABClick = () => {
+    setChatVisible(true);
+    setShowFAB(false);
+  };
+
+  const handleCloseChat = () => {
+    setChatVisible(false);
+    setShowFAB(true);
+  };
+
   return (
-    <div className="font-sans">
+    <>
       {bubbleContent && (
         <FloatingBubble
           status={bubbleContent.status}
@@ -71,7 +80,20 @@ export default function App() {
           onClose={() => setMcqResult(null)}
         />
       )}
-      {isChatVisible && <ChatOverlay onClose={() => setChatVisible(false)} />}
-    </div>
+      {showFAB && !isChatVisible && !bubbleContent && !mcqResult && (
+        <FloatingActionButton onClick={handleFABClick} />
+      )}
+      {isChatVisible && <ChatOverlay onClose={handleCloseChat} />}
+    </>
+  );
+}
+
+export default function App() {
+  return (
+    <ThemeProvider>
+      <div className="font-sans">
+        <AppContent />
+      </div>
+    </ThemeProvider>
   );
 }

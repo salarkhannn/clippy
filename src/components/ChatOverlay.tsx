@@ -4,8 +4,8 @@
 // components/ChatOverlay.tsx
 import React, { useState, useRef, useEffect } from 'react';
 import { ChatMessage, MessageType } from '../types';
-import { CloseIcon, SendIcon, LoadingSpinner, SparklesIcon, PlusIcon } from './Icons';
-import { THEME } from '../constants';
+import { CloseIcon, SendIcon, SparklesIcon, PlusIcon, CameraIcon, SunIcon, MoonIcon } from './Icons';
+import { useTheme } from '../context/ThemeContext';
 
 interface ChatOverlayProps {
   onClose: () => void;
@@ -17,8 +17,10 @@ const ChatOverlay: React.FC<ChatOverlayProps> = ({ onClose }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [showAttachMenu, setShowAttachMenu] = useState(false);
   const [pendingScreenshot, setPendingScreenshot] = useState<string | null>(null);
+  const { isDarkMode, toggleTheme } = useTheme();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -29,7 +31,6 @@ const ChatOverlay: React.FC<ChatOverlayProps> = ({ onClose }) => {
   // Close menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      // Use composedPath to handle Shadow DOM event retargeting
       const path = event.composedPath();
       const isInside = path.some(node => node === menuRef.current);
       
@@ -52,6 +53,7 @@ const ChatOverlay: React.FC<ChatOverlayProps> = ({ onClose }) => {
       
       if (response.status === 'success' && response.dataUrl) {
         setPendingScreenshot(response.dataUrl);
+        inputRef.current?.focus();
       } else {
         console.error("Failed to capture screen:", response.text);
       }
@@ -98,116 +100,271 @@ const ChatOverlay: React.FC<ChatOverlayProps> = ({ onClose }) => {
   };
 
   return (
-    <div 
-        className="fixed inset-0 z-[2147483646] flex items-end justify-end p-6 pointer-events-none"
-    >
+    <div className={`fixed inset-0 z-[100] flex items-end justify-end p-6 pointer-events-none ${isDarkMode ? 'dark' : ''}`}>
       <div 
-        className="w-[28vw] h-[45vh] flex flex-col rounded-2xl overflow-hidden pointer-events-auto animate-slide-up-fade backdrop-blur-xl bg-glass-bg border border-glass-border shadow-[0_0_40px_rgba(0,0,0,0.3)]"
+        className={`
+          w-[380px] h-[520px] max-h-[80vh] flex flex-col 
+          rounded-lg overflow-hidden pointer-events-auto 
+          animate-modal-in shadow-lg
+          ${isDarkMode 
+            ? 'bg-surface-dark border border-border-dark' 
+            : 'bg-surface-secondary border border-border-light'
+          }
+        `}
       >
-        <header className="flex items-center justify-between p-4 border-b border-glass-border bg-white/5">
+        {/* Header - minimal Linear style */}
+        <header 
+          className={`
+            flex items-center justify-between px-4 py-3
+            ${isDarkMode 
+              ? 'border-b border-border-dark' 
+              : 'border-b border-border-light'
+            }
+          `}
+        >
           <div className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-neon-primary animate-pulse"></div>
-            <h1 className="text-lg font-bold text-neon-primary tracking-wide drop-shadow-[0_0_10px_rgba(176,251,255,0.5)]">
-              CLIPPY AI
+            <SparklesIcon className={`w-4 h-4 ${isDarkMode ? 'text-accent' : 'text-accent'}`} />
+            <h1 className={`
+              text-sm font-medium tracking-[-0.01em]
+              ${isDarkMode ? 'text-text-dark-primary' : 'text-text-primary'}
+            `}>
+              Clippy
             </h1>
           </div>
-          <button onClick={onClose} className="text-neutral-400 hover:text-white transition-colors p-1 hover:bg-white/10 rounded-full cursor-pointer">
-            <CloseIcon className="w-5 h-5" />
-          </button>
+          <div className="flex items-center gap-1">
+            {/* Theme Toggle Button */}
+            <button 
+              onClick={toggleTheme} 
+              className={`
+                p-1.5 rounded-md transition-opacity duration-100
+                ${isDarkMode 
+                  ? 'text-text-dark-secondary hover:text-text-dark-primary' 
+                  : 'text-text-secondary hover:text-text-primary'
+                }
+                cursor-pointer hover:opacity-80
+              `}
+              title={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+            >
+              {isDarkMode ? <SunIcon className="w-4 h-4" /> : <MoonIcon className="w-4 h-4" />}
+            </button>
+            {/* Close Button */}
+            <button 
+              onClick={onClose} 
+              className={`
+                p-1.5 rounded-md transition-opacity duration-100
+                ${isDarkMode 
+                  ? 'text-text-dark-secondary hover:text-text-dark-primary' 
+                  : 'text-text-secondary hover:text-text-primary'
+                }
+                cursor-pointer hover:opacity-80
+              `}
+            >
+              <CloseIcon className="w-4 h-4" />
+            </button>
+          </div>
         </header>
         
-        <main className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
+        {/* Messages - dense Linear style */}
+        <main 
+          className={`
+            flex-1 overflow-y-auto px-4 py-3 space-y-3 scrollbar-styled
+            ${isDarkMode ? 'bg-surface-dark' : 'bg-surface-primary'}
+          `}
+        >
           {messages.length === 0 && (
-            <div className="h-full flex flex-col items-center justify-center text-neutral-500 space-y-2 opacity-60">
-              <SparklesIcon className="w-8 h-8 text-neon-primary/50" />
-              <p className="text-sm font-light">How can I help you today?</p>
+            <div className="h-full flex flex-col items-center justify-center space-y-3">
+              <SparklesIcon className={`w-5 h-5 ${isDarkMode ? 'text-text-dark-tertiary' : 'text-text-tertiary'}`} />
+              <div className="text-center space-y-1">
+                <p className={`text-sm font-medium ${isDarkMode ? 'text-text-dark-primary' : 'text-text-primary'}`}>
+                  How can I help?
+                </p>
+                <p className={`text-xs ${isDarkMode ? 'text-text-dark-secondary' : 'text-text-secondary'}`}>
+                  Ask a question or capture your screen
+                </p>
+              </div>
+              
+              {/* Quick actions - Linear style compact pills */}
+              <div className="flex flex-wrap justify-center gap-1.5 mt-3">
+                {['Summarize page', 'Explain this', 'Help write'].map((suggestion) => (
+                  <button
+                    key={suggestion}
+                    onClick={() => setInput(suggestion)}
+                    className={`
+                      px-2.5 py-1 text-xs rounded-md transition-all duration-100 cursor-pointer
+                      ${isDarkMode 
+                        ? 'bg-surface-dark-tertiary text-text-dark-secondary hover:text-text-dark-primary' 
+                        : 'bg-surface-tertiary text-text-secondary hover:text-text-primary'
+                      }
+                    `}
+                  >
+                    {suggestion}
+                  </button>
+                ))}
+              </div>
             </div>
           )}
-          {messages.map((msg, index) => (
-            <div key={msg.id} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} animate-slide-up-fade`} style={{ animationDelay: `${index * 0.05}s` }}>
+          
+          {messages.map((msg) => (
+            <div 
+              key={msg.id} 
+              className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} animate-fade-in`}
+            >
               <div 
-                className={`max-w-[85%] p-3.5 rounded-2xl backdrop-blur-md border border-white/5 shadow-lg
+                className={`
+                  max-w-[80%] px-3 py-2 rounded-md
                   ${msg.role === 'user' 
-                    ? 'bg-gradient-to-br from-violet-600/80 to-fuchsia-600/80 text-white rounded-tr-sm' 
-                    : 'bg-white/5 text-neutral-200 rounded-tl-sm'
-                  }`}
+                    ? 'bg-accent text-white' 
+                    : isDarkMode 
+                      ? 'bg-surface-dark-tertiary text-text-dark-primary' 
+                      : 'bg-surface-tertiary text-text-primary'
+                  }
+                `}
               >
                 {msg.image && (
-                  <div className="relative group mb-2 overflow-hidden rounded-lg border border-white/10">
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                    <img src={msg.image} alt="Screenshot" className="max-w-full" />
+                  <div className="mb-2 overflow-hidden rounded">
+                    <img 
+                      src={msg.image} 
+                      alt="Screenshot" 
+                      className="max-w-full rounded"
+                    />
                   </div>
                 )}
-                <p className="text-sm leading-relaxed font-light tracking-wide">{msg.text}</p>
+                <p className="text-sm leading-relaxed">{msg.text}</p>
               </div>
             </div>
           ))}
+          
           {isLoading && (
-            <div className="flex justify-start animate-pulse">
-              <div className="p-3 rounded-2xl rounded-tl-sm bg-white/5 text-neon-primary flex items-center gap-2 border border-white/5">
-                <LoadingSpinner className="w-4 h-4" />
-                <span className="text-xs font-mono tracking-wider">PROCESSING...</span>
+            <div className="flex justify-start animate-fade-in">
+              <div className={`
+                px-3 py-2 rounded-md
+                ${isDarkMode ? 'bg-surface-dark-tertiary' : 'bg-surface-tertiary'}
+              `}>
+                <div className="flex items-center gap-1">
+                  <div className={`w-1 h-1 rounded-full animate-pulse-subtle ${isDarkMode ? 'bg-text-dark-secondary' : 'bg-text-secondary'}`} style={{ animationDelay: '0ms' }}></div>
+                  <div className={`w-1 h-1 rounded-full animate-pulse-subtle ${isDarkMode ? 'bg-text-dark-secondary' : 'bg-text-secondary'}`} style={{ animationDelay: '150ms' }}></div>
+                  <div className={`w-1 h-1 rounded-full animate-pulse-subtle ${isDarkMode ? 'bg-text-dark-secondary' : 'bg-text-secondary'}`} style={{ animationDelay: '300ms' }}></div>
+                </div>
               </div>
             </div>
           )}
           <div ref={messagesEndRef} />
         </main>
         
-        <footer className="p-4 border-t border-glass-border bg-black/20 relative">
+        {/* Footer / Input - Linear minimal style */}
+        <footer 
+          className={`
+            p-3 
+            ${isDarkMode 
+              ? 'border-t border-border-dark bg-surface-dark-secondary' 
+              : 'border-t border-border-light bg-surface-secondary'
+            }
+          `}
+        >
+          {/* Screenshot Preview */}
           {pendingScreenshot && (
-            <div className="absolute bottom-full left-4 mb-2 p-2 bg-black/80 backdrop-blur-xl rounded-xl border border-glass-border shadow-2xl flex items-start gap-3 animate-slide-up-fade">
-              <img src={pendingScreenshot} alt="Thumbnail" className="h-16 w-auto rounded-lg border border-white/10" />
+            <div className={`
+              mb-2 p-2 rounded-md flex items-start gap-2 animate-fade-in
+              ${isDarkMode ? 'bg-surface-dark-tertiary' : 'bg-surface-tertiary'}
+            `}>
+              <img 
+                src={pendingScreenshot} 
+                alt="Screenshot preview" 
+                className="h-12 w-auto rounded object-cover"
+              />
               <button 
                 onClick={() => setPendingScreenshot(null)}
-                className="text-neutral-400 hover:text-white hover:bg-white/10 rounded-full p-1 transition-colors cursor-pointer"
+                className={`
+                  p-0.5 rounded transition-opacity duration-100 cursor-pointer
+                  ${isDarkMode ? 'text-text-dark-secondary hover:text-text-dark-primary' : 'text-text-secondary hover:text-text-primary'}
+                `}
               >
-                <CloseIcon className="w-4 h-4" />
+                <CloseIcon className="w-3 h-3" />
               </button>
             </div>
           )}
 
-          <form onSubmit={handleSend} className="flex items-center gap-3">
+          <form onSubmit={handleSend} className="flex items-center gap-2">
+            {/* Attach Button */}
             <div className="relative" ref={menuRef}>
               <button
                 type="button"
                 onClick={() => setShowAttachMenu(!showAttachMenu)}
-                className={`p-2.5 rounded-xl transition-all duration-300 cursor-pointer ${showAttachMenu ? 'bg-neon-primary/20 text-neon-primary' : 'text-neutral-400 hover:text-white hover:bg-white/5'}`}
+                className={`
+                  p-2 rounded-md transition-all duration-100 cursor-pointer
+                  ${showAttachMenu 
+                    ? 'bg-accent-subtle text-accent' 
+                    : isDarkMode 
+                      ? 'text-text-dark-secondary hover:text-text-dark-primary hover:bg-surface-dark-tertiary' 
+                      : 'text-text-secondary hover:text-text-primary hover:bg-surface-tertiary'
+                  }
+                `}
               >
-                <PlusIcon className="w-5 h-5" />
+                <PlusIcon className="w-4 h-4" />
               </button>
               
+              {/* Attach Menu - Linear dropdown style */}
               {showAttachMenu && (
-                <div className="absolute bottom-full left-0 mb-3 w-48 bg-[#0a0a0f]/95 backdrop-blur-xl border border-glass-border rounded-xl shadow-2xl overflow-hidden animate-slide-up-fade z-50">
+                <div className={`
+                  absolute bottom-full left-0 mb-1 w-40 overflow-hidden 
+                  rounded-md shadow-md
+                  ${isDarkMode 
+                    ? 'bg-surface-dark-secondary border border-border-dark' 
+                    : 'bg-surface-secondary border border-border-light'
+                  }
+                `}>
                   <button
                     type="button"
                     onClick={handleCaptureScreen}
-                    className="w-full text-left px-4 py-3 text-sm text-neutral-300 hover:text-white hover:bg-white/5 transition-colors flex items-center gap-2 group cursor-pointer"
+                    className={`
+                      w-full text-left px-3 py-2 text-sm transition-colors duration-100 
+                      flex items-center gap-2 cursor-pointer
+                      ${isDarkMode 
+                        ? 'text-text-dark-secondary hover:text-text-dark-primary hover:bg-surface-dark-tertiary' 
+                        : 'text-text-secondary hover:text-text-primary hover:bg-surface-tertiary'
+                      }
+                    `}
                   >
-                    <div className="w-1.5 h-1.5 rounded-full bg-neon-secondary group-hover:shadow-[0_0_8px_#d946ef] transition-shadow"></div>
-                    Capture Screen
+                    <CameraIcon className="w-4 h-4" />
+                    Capture screen
                   </button>
                 </div>
               )}
             </div>
 
-            <div className="flex-1 relative group">
-              <div className="absolute -inset-0.5 bg-gradient-to-r from-neon-primary to-neon-secondary rounded-xl opacity-20 group-focus-within:opacity-50 transition duration-500 blur"></div>
+            {/* Input Field - Linear minimal style */}
+            <div className="flex-1">
               <input
+                ref={inputRef}
                 type="text"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 placeholder="Ask anything..."
-                className="relative w-full bg-black/40 border border-white/10 text-white rounded-xl px-4 py-2.5 focus:outline-none focus:border-white/20 placeholder-neutral-500 transition-all font-light"
+                className={`
+                  w-full px-3 py-2 rounded-md text-sm
+                  transition-colors duration-100
+                  focus:outline-none
+                  ${isDarkMode 
+                    ? 'bg-surface-dark-tertiary border border-border-dark text-text-dark-primary placeholder-text-dark-secondary focus:border-accent' 
+                    : 'bg-surface-tertiary border border-border-light text-text-primary placeholder-text-secondary focus:border-accent'
+                  }
+                `}
                 disabled={isLoading}
               />
             </div>
             
+            {/* Send Button - Linear compact style */}
             <button
               type="submit"
               disabled={isLoading || (!input.trim() && !pendingScreenshot)}
-              className="p-2.5 rounded-xl bg-gradient-to-r from-neon-primary to-neon-secondary text-black disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-[0_0_15px_rgba(176,251,255,0.4)] transition-all duration-300 transform hover:scale-105 active:scale-95 cursor-pointer"
+              className={`
+                px-3 py-2 rounded-md bg-accent text-white text-sm font-medium
+                disabled:opacity-40 disabled:cursor-not-allowed
+                hover:bg-accent-hover active:shadow-inset
+                transition-all duration-100 cursor-pointer
+              `}
             >
-              <SendIcon className="w-5 h-5" />
+              <SendIcon className="w-4 h-4" />
             </button>
           </form>
         </footer>

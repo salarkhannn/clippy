@@ -1,23 +1,51 @@
 @import "tailwindcss";
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Outfit:wght@300;400;500;600;700&display=swap');
 
 @theme {
-  --font-sans: 'Outfit', sans-serif;
-  --font-mono: 'JetBrains Mono', monospace;
+  /* Typography - System font stack */
+  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  --font-mono: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
 
-  --color-neon-primary: #b0fbff;
-  --color-neon-secondary: #d946ef;
-  --color-glass-bg: rgba(10, 10, 15, 0.6);
-  --color-glass-border: rgba(255, 255, 255, 0.1);
+  /* Light mode surfaces (Linear-style) */
+  --color-surface-primary: #FAFAFA;
+  --color-surface-secondary: #FFFFFF;
+  --color-surface-tertiary: #F5F5F5;
   
-  --animate-slide-up-fade: slide-up-fade 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-  --animate-pulse-glow: pulse-glow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-  --animate-shimmer: shimmer 2s linear infinite;
+  /* Dark mode surfaces (Linear-style) */
+  --color-surface-dark: #16161A;
+  --color-surface-dark-secondary: #1C1C21;
+  --color-surface-dark-tertiary: #27272C;
+  
+  /* Text colors - Linear style (not pure black/white) */
+  --color-text-primary: #1A1A1A;
+  --color-text-secondary: #8A8A8A;
+  --color-text-tertiary: #565656;
+  --color-text-dark-primary: #E6E6E6;
+  --color-text-dark-secondary: #8A8A8A;
+  --color-text-dark-tertiary: #565656;
+  
+  /* Accent - Linear brand purple */
+  --color-accent: #5E6AD2;
+  --color-accent-hover: #4F5ABF;
+  --color-accent-subtle: rgba(94, 106, 210, 0.08);
+  
+  /* Borders - very subtle */
+  --color-border-light: rgba(0, 0, 0, 0.05);
+  --color-border-dark: rgba(255, 255, 255, 0.05);
+  
+  /* Shadows - Linear minimal */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 1px 3px rgba(0, 0, 0, 0.05);
+  --shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.08);
+  
+  /* Animations - Linear fast */
+  --animate-modal-in: modal-in 0.1s ease-out;
+  --animate-fade-in: fade-in 0.1s ease-out;
+  --animate-pulse-subtle: pulse-subtle 1.5s ease-in-out infinite;
 
-  @keyframes slide-up-fade {
+  @keyframes modal-in {
     0% {
       opacity: 0;
-      transform: translateY(10px);
+      transform: translateY(2px);
     }
     100% {
       opacity: 1;
@@ -25,27 +53,57 @@
     }
   }
 
-  @keyframes pulse-glow {
-    0%, 100% {
-      opacity: 1;
-      box-shadow: 0 0 10px rgba(176, 251, 255, 0.3);
+  @keyframes fade-in {
+    0% {
+      opacity: 0;
     }
-    50% {
-      opacity: 0.8;
-      box-shadow: 0 0 20px rgba(176, 251, 255, 0.5);
+    100% {
+      opacity: 1;
     }
   }
 
-  @keyframes shimmer {
-    from {
-      background-position: 0 0;
+  @keyframes pulse-subtle {
+    0%, 100% {
+      opacity: 1;
     }
-    to {
-      background-position: -200% 0;
+    50% {
+      opacity: 0.5;
     }
   }
 }
 
 :host {
-  font-family: 'Outfit', sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  font-size: 13px;
+  line-height: 1.45;
+  letter-spacing: -0.01em;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Scrollbar styling - minimal */
+.scrollbar-styled::-webkit-scrollbar {
+  width: 4px;
+}
+
+.scrollbar-styled::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-styled::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 2px;
+}
+
+.scrollbar-styled::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+/* Dark mode scrollbar */
+.dark .scrollbar-styled::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.dark .scrollbar-styled::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
 }

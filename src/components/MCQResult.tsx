@@ -1,5 +1,6 @@
 import React from 'react';
-import { THEME } from '../constants';
+import { CloseIcon, CheckIcon, AlertIcon } from './Icons';
+import { useTheme } from '../context/ThemeContext';
 
 interface MCQResultProps {
   status: 'loading' | 'success' | 'error';
@@ -8,31 +9,63 @@ interface MCQResultProps {
 }
 
 const MCQResult: React.FC<MCQResultProps> = ({ status, text, onClose }) => {
+  const { isDarkMode } = useTheme();
+
   return (
     <div
-      className="fixed bottom-5 right-5 z-[10000] flex items-center gap-4 p-4 rounded-2xl bg-glass-bg backdrop-blur-xl border border-glass-border shadow-[0_0_30px_rgba(0,0,0,0.5)] animate-slide-up-fade text-white min-w-[120px] justify-center group overflow-hidden"
+      className={`
+        fixed bottom-6 right-6 z-[50] 
+        flex items-center gap-3 px-4 py-3 
+        rounded-lg shadow-md animate-modal-in
+        ${isDarkMode 
+          ? 'bg-surface-dark-secondary border border-border-dark' 
+          : 'bg-surface-secondary border border-border-light'
+        }
+      `}
     >
-      <div className="absolute inset-0 bg-gradient-to-r from-neon-primary/5 to-neon-secondary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-      
       {status === 'loading' ? (
-        <div className="relative">
-           <div className="absolute inset-0 bg-neon-primary blur-md opacity-50 animate-pulse"></div>
-           <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-neon-primary relative z-10"></div>
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
+            <div className={`w-1 h-1 rounded-full animate-pulse-subtle ${isDarkMode ? 'bg-text-dark-secondary' : 'bg-text-tertiary'}`} style={{ animationDelay: '0ms' }}></div>
+            <div className={`w-1 h-1 rounded-full animate-pulse-subtle ${isDarkMode ? 'bg-text-dark-secondary' : 'bg-text-tertiary'}`} style={{ animationDelay: '150ms' }}></div>
+            <div className={`w-1 h-1 rounded-full animate-pulse-subtle ${isDarkMode ? 'bg-text-dark-secondary' : 'bg-text-tertiary'}`} style={{ animationDelay: '300ms' }}></div>
+          </div>
+          <span className={`text-xs ${isDarkMode ? 'text-text-dark-secondary' : 'text-text-tertiary'}`}>
+            Analyzing...
+          </span>
         </div>
       ) : (
-        <div className="text-2xl font-bold font-mono text-neon-primary relative z-10 tracking-wider drop-shadow-[0_0_10px_rgba(176,251,255,0.3)]">
-          {text}
+        <div className="flex items-center gap-2">
+          {status === 'success' ? (
+            <CheckIcon className="w-4 h-4 text-status-success" />
+          ) : (
+            <AlertIcon className="w-4 h-4 text-status-error" />
+          )}
+          <span className={`
+            text-xs font-medium
+            ${status === 'success' 
+              ? 'text-status-success' 
+              : status === 'error'
+                ? 'text-status-error'
+                : isDarkMode ? 'text-text-dark-primary' : 'text-text-primary'
+            }
+          `}>
+            {text}
+          </span>
         </div>
       )}
       
       <button
         onClick={onClose}
-        className="relative z-10 text-neutral-400 hover:text-white transition-colors hover:bg-white/10 rounded-full p-1 ml-2 cursor-pointer"
+        className={`
+          p-1 rounded-md transition-opacity duration-100 cursor-pointer ml-1
+          ${isDarkMode 
+            ? 'text-text-dark-secondary hover:text-text-dark-primary' 
+            : 'text-text-secondary hover:text-text-primary'
+          }
+        `}
       >
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <line x1="18" y1="6" x2="6" y2="18"></line>
-          <line x1="6" y1="6" x2="18" y2="18"></line>
-        </svg>
+        <CloseIcon className="w-3.5 h-3.5" />
       </button>
     </div>
   );
